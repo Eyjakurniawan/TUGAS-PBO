@@ -1,18 +1,23 @@
 #include <iostream>
+#include <iomanip>
+#include <string>
+
 using namespace std;
 
-// Encapsulation: Ayas
+// 1. Encapsulation: Yazira
+// =========================================================================
 class Mahasiswa {
-    protected: //Agar bisa diwariskan
+protected: 
     string nama, nim;
 
-    public: //Constructor untuk inisialisasi awal
+public: 
+    // Constructor untuk inisialisasi awal
     Mahasiswa(){
         nama = " ";
         nim = " ";
     }
 
-    void setData (string namaMhs, string nimMhs){ //Setter
+    void setData(string namaMhs, string nimMhs){ // Setter
         nama = namaMhs;
         nim = nimMhs;
     }
@@ -25,16 +30,18 @@ class Mahasiswa {
     }
 };
 
-// Inheritance : Raihan Parsa
-class MataKuliah : public Mahasiswa {
-    protected: // Dibuat protected agar nanti bisa diwariskan lagi ke Eyja
+// 2. Inheritance Dasar: Raihan Parsa
+// =========================================================================
+// Class ini dibuat berdiri sendiri agar bisa digabung di class Nilai
+class MataKuliah {
+protected: 
     string namaMK[10];
     int sks[10];
     char nilaiHuruf[10];
     float ipPerMK[10];
     int jumlahMK;
 
-    public:
+public:
     MataKuliah() {
         jumlahMK = 0;
     }
@@ -55,50 +62,90 @@ class MataKuliah : public Mahasiswa {
             else ipPerMK[i] = 0.0;
         }
     }
+};
 
-    // Method untuk membuktikan Inheritance kamu berjalan sukses
-    void cetakDataSementara() {
-        cout << "\n=======================================\n";
-        cout << "       DATA SEMENTARA (INHERITANCE)    \n";
-        cout << "=======================================\n";
-        // getNama() dan getNim() bisa dipakai karena class ini mewarisi class Mahasiswa
-        cout << "Nama Mahasiswa : " << getNama() << endl; 
-        cout << "NIM            : " << getNim() << endl;
-        cout << "---------------------------------------\n";
-        cout << "Rincian Mata Kuliah:\n";
+// 3. Multi-Inheritance & Main: Eyja
+// =========================================================================
+// DI SINI LETAK MULTIPLE INHERITANCE (Mewarisi Mahasiswa DAN MataKuliah)
+class Nilai : public Mahasiswa, public MataKuliah {
+private:
+    float ipk;
+
+public:
+    Nilai() {
+        ipk = 0.0;
+    }
+
+    // Mengolah data dari Mahasiswa dan MataKuliah untuk menghitung IPK otomatis
+    void hitungIPK() {
+        float totalBobot = 0;
+        int totalSKS = 0;
+
         for(int i = 0; i < jumlahMK; i++) {
-            cout << i+1 << ". " << namaMK[i] 
-                 << " | SKS: " << sks[i] 
-                 << " | Nilai: " << nilaiHuruf[i] 
-                 << " | IP MK: " << ipPerMK[i] << endl;
+            totalBobot += (ipPerMK[i] * sks[i]);
+            totalSKS += sks[i];
         }
-        cout << "=======================================\n";
+
+        if (totalSKS > 0) {
+            ipk = totalBobot / totalSKS;
+        } else {
+            ipk = 0.0;
+        }
+    }
+
+    // Cetak KHS Akhir yang rapi
+    void cetakKHS() {
+        cout << "\n\n=========================================================\n";
+        cout << "               KARTU HASIL STUDI (KHS)                   \n";
+        cout << "=========================================================\n";
+        cout << "Nama Mahasiswa : " << getNama() << endl; // Mengambil dari Mahasiswa
+        cout << "NIM            : " << getNim() << endl;  // Mengambil dari Mahasiswa
+        cout << "---------------------------------------------------------\n";
+        cout << left << setw(20) << "Mata Kuliah" 
+             << setw(10) << "SKS" 
+             << setw(12) << "Nilai Huruf" 
+             << "IP MK" << endl;
+        cout << "---------------------------------------------------------\n";
+        
+        // Mengambil data array dari MataKuliah
+        for(int i = 0; i < jumlahMK; i++) {
+            cout << left << setw(20) << namaMK[i]
+                 << setw(10) << sks[i]
+                 << setw(12) << nilaiHuruf[i]
+                 << fixed << setprecision(2) << ipPerMK[i] << endl;
+        }
+        cout << "---------------------------------------------------------\n";
+        cout << "IPK GABUNGAN   : " << fixed << setprecision(2) << ipk << endl;
+        cout << "=========================================================\n";
     }
 };
 
-// --- FUNGSI MAIN (Untuk ngetes kode kamu) ---
+// --- FUNGSI MAIN UTAMA ---
 int main() {
-    MataKuliah mk; //
+    Nilai mhsNilai; // Menggunakan class Nilai yang memegang semua data
     string namaInput, nimInput;
     int jmlInput;
 
-    cout << "--- PROGRAM PENDATAAN NILAI ---\n";
+    cout << "===========================================\n";
+    cout << "       PROGRAM PENDATAAN NILAI KAMPUS      \n";
+    cout << "===========================================\n";
     cout << "Masukkan Nama Mahasiswa : ";
     getline(cin, namaInput);
     cout << "Masukkan NIM Mahasiswa  : ";
     cin >> nimInput;
 
-    // Memakai fungsi dari Yazira
-    mk.setData(namaInput, nimInput);
+    // Set data identitas mahasiswa (Fungsi Yazira)
+    mhsNilai.setData(namaInput, nimInput);
 
     cout << "Masukkan jumlah Mata Kuliah : ";
     cin >> jmlInput;
 
-    // Menjalankan fungsi dari class Raihan Parsa
-    mk.inputDataMK(jmlInput);
+    // Input data krs mata kuliah (Fungsi Raihan)
+    mhsNilai.inputDataMK(jmlInput);
 
-    // Mencetak hasil
-    mk.cetakDataSementara();
+    // Proses hitung & cetak hasil akhir (Fungsi Eyja)
+    mhsNilai.hitungIPK();
+    mhsNilai.cetakKHS();
 
     return 0;
 }
